@@ -1,4 +1,4 @@
-﻿# Bacalaureat data
+# Bacalaureat data
 
 This repository contains the [Romanian Baccalaureate](http://en.wikipedia.org/wiki/Romanian_Baccalaureate) results and scraper scripts, which are published on the Internet bi-annually, but are not made available in downloadable and accessible formats, only via badly obfuscated HTML pages. Regardless, this information is in public domain, so I'm not sure why they went through all the trouble to make the data "hard" to scrape.
 
@@ -46,21 +46,25 @@ This script will create six files in `YY-MM.FMT` format. Expect each file to be 
 
 ### Pre-processed data
 
-Look for the files matching the pattern `13-07.[csv|js|xml].rar` in this repository for readily downloadable pre-processed data. These files were created using `parse13.php`. At the time of this commit it wasn't/isn't September (yet), therefore the `09` data is not yet available.
+Look for the files matching the pattern `13-[07|09].[csv|js|xml].rar` in this repository for readily downloadable pre-processed data. These files were created using `parse13-07.php` and `gen13-09.php`.
 
 I will try to update the scripts and include the pre-processed data, but since this project isn't a priority, expect up to ~1 month of delay.
 
 ### Do-it-yourself
 
-#### get13.php
+#### get13-07.php
 
-The 2013 Bacalaureat site is not just a bunch of static pages, and because of this, it needs a proper crawler. `get13.php` is different from `gen12.php` in the sense that it downloads the files, not just generates a list of URLs. Make sure to create `data13/` and that it's empty. The `__VIEWSTATE` and `__EVENTVALIDATION` fields update with every pagination, and it is not possible to resume an interrupted session. You will need to update these fields in the script from the very last downloaded page in order to do so. These tokens may also expire (I'm not sure), so if the ones in the script currently don't work, just go to the [results page](http://bacalaureat.edu.ro/Pages/TaraRezultAlfa.aspx) and extract the values of `<input type="hidden" name="__[VIEWSTATE|EVENTVALIDATION]" value="..." />` from the source of the page.
+The 2013 Bacalaureat site is not just a bunch of static pages, and because of this, it needs a proper crawler. `get13-07.php` is different from `gen12.php` in the sense that it downloads the files, not just generates a list of URLs. Make sure to create `data13/` and that it's empty. The `__VIEWSTATE` and `__EVENTVALIDATION` fields update with every pagination, and it is not possible to resume an interrupted session. You will need to update these fields in the script from the very last downloaded page in order to do so. These tokens may also expire (I'm not sure), so if the ones in the script currently don't work, just go to the [results page](http://bacalaureat.edu.ro/Pages/TaraRezultAlfa.aspx) and extract the values of `<input type="hidden" name="__[VIEWSTATE|EVENTVALIDATION]" value="..." />` from the source of the page.
 
 This script will take about 12 hours to run, which will give you 18885 files totaling 9.1 GB in size.
 
-If you don't feel like waiting 12 hours, the data is available for download at `data13/data13.rar`. The data in this archive is stripped, taking up only 4.5 GB. The size of the archive is only 14 MB. Upon decompression, look at the size of `data13` and [think of this meme](http://i.imgur.com/PDnFE.jpg).
+If you don't feel like waiting 12 hours, the data is available for download at `data13/data13-07.rar`. The data in this archive is stripped, taking up only 4.5 GB. The size of the archive is only 14 MB. Upon decompression, look at the size of `data13` and [think of this meme](http://i.imgur.com/PDnFE.jpg).
 
-#### strip13.php
+#### gen13-09.php
+
+This script works the same way as `gen12.php` except for the 2013-09 session. Generates a list of URLs where the files contain Siveco's NSA-proof encryption. (see above, the flash thingy, or better yet, don't.)
+
+#### strip13-07.php
 
 This file is NOT part of the data processing, so you may skip this section, if you're not curious how incompetent the developers of bacalaureat.edu.ro are.
 
@@ -70,15 +74,23 @@ You could say these [view states in ASP.NET](http://msdn.microsoft.com/en-us/lib
 
 Seriously, what the fuck? Was it written by 13-year-olds who know nothing about C# and ASP.NET? Anyways, I didn't expect much from an institution that [gives a text about Twilight](http://i.imgur.com/XNZfPgo.jpg) as the reading comprehension part of their English exam in 2013, and before that in 2012, on the listening part of the exam they spelled the name of [Jon Stewart as John Stuart](http://i.imgur.com/uB5cKYf.jpg). Clearly, even *THEY* failed the listening part. As a Daily Show watcher, that made me so furious, I couldn't take the rest of the English exam seriously. Still nailed it and got B2-B2-B2-B2-B2. 
 
-#### parse13.php
+#### parse13-[07|09].php
 
 Parses the pages located in `data13/` into three open formats: CSV, JSON and XML. It is recommended to run the whole thing on an SSD, otherwise it's going to take a while, since each student object is flushed to disk immediately after creation in order to avoid memory exhaustion issues.
 
 This script will create three files in `YY-MM.FMT` format. Expect each file to be 45-130 MB in size.
 
-This script *may* work with `13-09` data when it's published, given that the page layouts are not modified and the regular expressions still match.
-
 ## Miscellaneous stuff
+
+#### The archives are broken!!1
+
+The archives were created using RAR5. Decompression requires RAR 5.x and it won't work with RAR 4.x clients, and most 3rd-party applications that offer RAR decompression due to their most likely outdated libraries.
+
+If you are on Windows, simply update your WinRAR installation to the latest version. If you are on Linux, there is a freeware UNRAR utility which works just fine, given that it has been updated to 5.x. Your package manager most likely has it in the `non-free` section. If not, or is outdated, you can get standalone binaries from [RARLAB](http://www.rarlab.com/download.htm).
+
+Unfortunately the UNRAR utility doesn't seem to support multiple input files, so `unrar x *.rar` won't work. To get around this and extract all the archives at once, use `find . -iname '*.rar' -exec sh -c 'unrar x "{}"' \;`
+
+As for the reason why this format was chosen, is because it resulted in the smallest archive sizes out of all the applications I tried. Due to repository size constraints on GitHub, I couldn't afford to push GB's of files.
 
 #### wtf.js
 
